@@ -1,0 +1,6 @@
+{
+  "name": "Hadus Kabab",
+  "description": "A modern, clean, premium fast-food kebab restaurant website featuring an interactive menu, customizable orders, a shopping bag, and elegant animations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
