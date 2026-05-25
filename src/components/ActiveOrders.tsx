@@ -1,13 +1,16 @@
 import { Clock, Flame, ShieldAlert, Award, AlertCircle, Sparkles, Navigation, X } from 'lucide-react';
 import { Order } from '../types';
+import { useLanguage } from '../LanguageContext';
 
 interface ActiveOrdersProps {
   isOpen: boolean;
   onClose: () => void;
   activeOrders: Order[];
+  onDismissOrder: (orderId: string) => void;
 }
 
-export default function ActiveOrders({ isOpen, onClose, activeOrders }: ActiveOrdersProps) {
+export default function ActiveOrders({ isOpen, onClose, activeOrders, onDismissOrder }: ActiveOrdersProps) {
+  const { language } = useLanguage();
   if (!isOpen) return null;
 
   const getStatusDetails = (status: Order['status']) => {
@@ -140,18 +143,28 @@ export default function ActiveOrders({ isOpen, onClose, activeOrders }: ActiveOr
                   </div>
 
                    {/* LIVE STATUS CARD */}
-                  <div className={`p-4 rounded-2xl ${details.bg} border border-gold-orange/15 mb-6 flex items-start space-x-3.5 shadow-sm`}>
-                    <div className={`p-2.5 rounded-xl bg-white text-gold-orange shadow-md flex-shrink-0 animate-bounce-short`}>
-                      <Flame className="w-5 h-5 animate-pulse" />
+                  <div className={`p-4 rounded-2xl ${details.bg} border border-gold-orange/15 mb-6 flex items-center justify-between shadow-sm gap-3`}>
+                    <div className="flex items-start space-x-3.5">
+                      <div className={`p-2.5 rounded-xl bg-white text-gold-orange shadow-md flex-shrink-0 animate-bounce-short`}>
+                        <Flame className="w-5 h-5 animate-pulse" />
+                      </div>
+                      <div className="text-left">
+                        <h4 className={`font-display text-sm font-black ${details.color} uppercase tracking-wider`}>
+                          {details.title}
+                        </h4>
+                        <p className="font-sans text-xs text-stone-700 mt-1 leading-relaxed font-semibold">
+                          {details.desc}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-left">
-                      <h4 className={`font-display text-sm font-black ${details.color} uppercase tracking-wider`}>
-                        {details.title}
-                      </h4>
-                      <p className="font-sans text-xs text-stone-700 mt-1 leading-relaxed font-semibold">
-                        {details.desc}
-                      </p>
-                    </div>
+                    {order.status === 'ready' && (
+                      <button
+                        onClick={() => onDismissOrder(order.id)}
+                        className="px-3 py-1.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-display text-[10px] font-bold uppercase tracking-wider transition-all duration-200 shadow-sm cursor-pointer whitespace-nowrap"
+                      >
+                        {language === 'lt' ? 'Pašalinti' : 'Dismiss'}
+                      </button>
+                    )}
                   </div>
 
                   {/* STEPS TRAILBAR */}

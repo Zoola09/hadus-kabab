@@ -193,12 +193,16 @@ export default function App() {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    // Append to live kitchen list, empty checkout drawer and direct user attention to live tracker
-    setActiveOrders((prev) => [newOrder, ...prev]);
+    // Append to live kitchen list (filtering out completed/ready orders), empty checkout drawer and direct user attention to live tracker
+    setActiveOrders((prev) => [newOrder, ...prev.filter((o) => o.status !== 'ready')]);
     setCart([]);
     setIsCheckoutOpen(false);
     setIsCartOpen(false);
     setIsTrackerOpen(true);
+  };
+
+  const handleDismissOrder = (orderId: string) => {
+    setActiveOrders((prev) => prev.filter((order) => order.id !== orderId));
   };
 
   return (
@@ -267,6 +271,7 @@ export default function App() {
         isOpen={isTrackerOpen}
         onClose={() => setIsTrackerOpen(false)}
         activeOrders={activeOrders}
+        onDismissOrder={handleDismissOrder}
       />
     </div>
   );

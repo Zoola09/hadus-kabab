@@ -98,14 +98,58 @@ export default function CheckoutModal({
 
     if (paymentMethod === 'card') {
       const cleanNum = cardNumber.replace(/\s+/g, '');
-      if (!cleanNum.trim() || cleanNum.length < 12) {
-        errors.cardNumber = language === 'lt' ? 'Nurodykite teisingą kortelės numerį' : 'Provide a valid card number';
+      
+      // Luhn checksum validation algorithm
+      const checkLuhn = (numStr: string) => {
+        let sum = 0;
+        let shouldDouble = false;
+        for (let i = numStr.length - 1; i >= 0; i--) {
+          let digit = parseInt(numStr.charAt(i), 10);
+          if (shouldDouble) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+          }
+          sum += digit;
+          shouldDouble = !shouldDouble;
+        }
+        return sum % 10 === 0;
+      };
+
+      if (!cleanNum.trim() || cleanNum.length < 15 || cleanNum.length > 16 || !/^\d+$/.test(cleanNum)) {
+        errors.cardNumber = language === 'lt' 
+          ? 'Nurodykite teisingą kortelės numerį (15-16 skaitmenų)' 
+          : 'Provide a valid card number (15-16 digits)';
+      } else if (!checkLuhn(cleanNum)) {
+        errors.cardNumber = language === 'lt' 
+          ? 'Neteisingas kortelės numerio kontrolinis skaičius' 
+          : 'Invalid card number checksum';
       }
-      if (!cardExpiry.trim() || !cardExpiry.includes('/')) {
-        errors.cardExpiry = language === 'lt' ? 'Nurodykite galiojimo datą (MM/YY)' : 'Provide MM/YY expiry';
+
+      // Expiration Date (format MM/YY, must be in the future)
+      const expiryRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+      const match = cardExpiry.match(expiryRegex);
+      if (!cardExpiry.trim() || !match) {
+        errors.cardExpiry = language === 'lt' 
+          ? 'Nurodykite teisingą galiojimo datą (MM/YY)' 
+          : 'Provide valid MM/YY expiry';
+      } else {
+        const month = parseInt(match[1], 10);
+        const year = parseInt("20" + match[2], 10);
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1; // 1-12
+        const currentYear = now.getFullYear();
+        if (year < currentYear || (year === currentYear && month < currentMonth)) {
+          errors.cardExpiry = language === 'lt' 
+            ? 'Kortelės galiojimo laikas pasibaigęs' 
+            : 'Card has expired';
+        }
       }
-      if (!cardCvv.trim() || cardCvv.length < 3) {
-        errors.cardCvv = language === 'lt' ? 'Nurodykite CVV kodą' : 'Provide CVV';
+
+      // CVV/CVC (exactly 3 or 4 digits)
+      if (!cardCvv.trim() || !/^\d{3,4}$/.test(cardCvv)) {
+        errors.cardCvv = language === 'lt' 
+          ? 'CVV turi būti 3 ar 4 skaitmenys' 
+          : 'CVV must be 3 or 4 digits';
       }
     }
 
