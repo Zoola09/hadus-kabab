@@ -27,14 +27,14 @@ export default function Hero() {
       {/* Background Image with epic grilled kebab aspect under deep dark overlay */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1600"
+          src="/images/hero_kebab_1778320555234.png"
           alt="Authentic Grilled Sizzling Kebabs over Flames"
           className="w-full h-full object-cover scale-105 animate-zoom-slow"
           referrerPolicy="no-referrer"
         />
         {/* Gradients to fade to black charcoal edges and maintain perfect high contrast text accessibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal/95 via-charcoal/80 to-charcoal-dark/95 z-10" />
-        <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-warm-beige-light to-transparent z-10" />
+        <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-[#111111] to-transparent z-10" />
       </div>
 
       {/* Decorative Fire Embers Animation Block */}

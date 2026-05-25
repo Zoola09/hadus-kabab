@@ -4,6 +4,7 @@ import Hero from './components/Hero';
 import MenuSection from './components/MenuSection';
 import CustomizationModal from './components/CustomizationModal';
 import CartDrawer from './components/CartDrawer';
+import CheckoutModal from './components/CheckoutModal';
 import ActiveOrders from './components/ActiveOrders';
 import AboutGallery from './components/AboutGallery';
 import ContactSection from './components/ContactSection';
@@ -17,6 +18,7 @@ export default function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
 
@@ -159,6 +161,14 @@ export default function App() {
     setIsCartOpen(true);
   };
 
+  const handleQuickAdd = (item: MenuItem) => {
+    const size = item.customization?.sizes[0] || { name: 'Regular', priceModifier: 0 };
+    const sauce = (item.customization?.sauces && item.customization.sauces.length > 0)
+      ? item.customization.sauces[0]
+      : { name: 'None', priceModifier: 0 };
+    handleAddToCart(item, size, sauce, [], 1);
+  };
+
   // ACTIONS: Proceed and submit finalized checkout
   const handleCheckout = (
     name: string,
@@ -186,6 +196,7 @@ export default function App() {
     // Append to live kitchen list, empty checkout drawer and direct user attention to live tracker
     setActiveOrders((prev) => [newOrder, ...prev]);
     setCart([]);
+    setIsCheckoutOpen(false);
     setIsCartOpen(false);
     setIsTrackerOpen(true);
   };
@@ -208,6 +219,7 @@ export default function App() {
         <MenuSection
           items={MENU_ITEMS}
           onItemSelect={(item) => setSelectedMenuItem(item)}
+          onQuickAdd={handleQuickAdd}
         />
       </div>
 
@@ -229,7 +241,18 @@ export default function App() {
         cart={cart}
         onUpdateQty={handleUpdateQty}
         onRemove={handleRemoveItem}
-        onCheckout={handleCheckout}
+        onProceedToCheckout={() => {
+          setIsCartOpen(false);
+          setIsCheckoutOpen(true);
+        }}
+      />
+
+      {/* MODAL: Checkout payment & details flow */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cart={cart}
+        onCheckoutComplete={handleCheckout}
       />
 
       {/* MODAL: Sizing, Sauce and Toppings choices selector */}

@@ -71,12 +71,17 @@ export default function ContactSection() {
                   {language === 'lt' ? 'ADRESAS' : 'ADDRESS'}
                 </span>
                 <span className="block font-sans text-sm sm:text-base text-charcoal font-semibold mt-1">
-                  Ukmergės g. 240, Vilnius<br />
-                  Lithuania, 06120
+                  Gabijos g. 30, Vilnius<br />
+                  Lithuania, 06100
                 </span>
-                <span className="block font-sans text-xs text-gold-orange mt-1.5 font-bold cursor-pointer hover:underline">
+                <a
+                  href="https://maps.app.goo.gl/DZepVrJUF8o4SssB6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block font-sans text-xs text-gold-orange mt-1.5 font-bold cursor-pointer hover:underline"
+                >
                   {language === 'lt' ? 'Rodyti maršrutą žemėlapyje' : 'Get directions on map'}
-                </span>
+                </a>
               </div>
             </div>
 
@@ -136,8 +141,8 @@ export default function ContactSection() {
           {/* GOOGLE MAPS EMBEDDED */}
           <div className="relative h-60 w-full rounded-3xl overflow-hidden shadow-md border border-warm-beige-dark">
             <iframe
-              title="Hadus Kabab Ukmerges Vilnius Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2304.283151806306!2d25.239331877073286!3d54.72183207271926!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46dd9154bcf9ef5f%3A0xc3b5eddc5eb57ff0!2sUkmerg%C4%97s%20g.%20240%2C%20Vilnius%2006120!5e0!3m2!1sen!2slt!4v1716331902000!5m2!1sen!2slt"
+              title="Hadus Kabab Gabijos Vilnius Location"
+              src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2303.5655693743997!2d25.220998999999996!3d54.734856!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNTTCsDQ0JzA1LjUiTiAyNcKwMTMnMTUuNiJF!5e0!3m2!1slt!2slt!4v1779709029026!5m2!1slt!2slt"
               className="absolute inset-0 w-full h-full"
               style={{ border: 0 }}
               allowFullScreen={false}

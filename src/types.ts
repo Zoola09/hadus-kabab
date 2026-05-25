@@ -15,7 +15,7 @@ export interface MenuItem {
   name_lt?: string;
   description: string;
   description_lt?: string;
-  category: 'kebabs' | 'wraps' | 'plates' | 'sides' | 'drinks';
+  category: 'kebabs' | 'wraps' | 'plates' | 'sides' | 'drinks' | 'burgers';
   basePrice: number;
   image: string;
   popular?: boolean;

@@ -85,6 +85,14 @@ export default function CustomizationModal({ item, onClose, onAddToCart }: Custo
   };
 
   const getLocalizedExtraName = (name: string, lang: string) => {
+    if (name.includes('(') && name.includes(')')) {
+      if (lang === 'lt') {
+        const match = name.match(/\(([^)]+)\)/);
+        return match ? match[1] : name;
+      } else {
+        return name.split(' (')[0];
+      }
+    }
     if (lang !== 'lt') return name.split(' Slice')[0].split(' Extra ')[0];
     const lower = name.toLowerCase();
     if (lower.includes('feta')) return 'Sūris Feta';
@@ -140,8 +148,8 @@ export default function CustomizationModal({ item, onClose, onAddToCart }: Custo
           <div className="absolute bottom-4 left-6 right-6 text-white">
             <span className="inline-block px-2.5 py-0.5 rounded-full bg-gold-orange text-[10px] font-bold uppercase tracking-widest mb-1.5">
               {language === 'lt'
-                ? { kebabs: 'Kebabas', wraps: 'Suktinukas', plates: 'Lėkštė', sides: 'Užkandis', drinks: 'Gėrimas' }[item.category] || item.category
-                : item.category}
+                ? { kebabs: 'Kebabas', wraps: 'Suktinukas', plates: 'Lėkštė', sides: 'Užkandis', drinks: 'Gėrimas', burgers: 'Burgeris' }[item.category] || item.category
+                : { kebabs: 'kebab', wraps: 'wrap', plates: 'plate', sides: 'side', drinks: 'drink', burgers: 'burger' }[item.category] || item.category}
             </span>
             <h3 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
               {nameVal}
@@ -259,7 +267,9 @@ export default function CustomizationModal({ item, onClose, onAddToCart }: Custo
               <div className="flex justify-between items-center mb-4">
                 <span className="font-display text-sm font-bold uppercase tracking-wider text-charcoal flex items-center">
                   <span className="w-1.5 h-4 bg-gold-orange mr-2 rounded"></span>
-                  {language === 'lt' ? '3. Pasirinkite priedus' : '3. Add Extras'}
+                  {item.category === 'burgers'
+                    ? (language === 'lt' ? '3. Specialūs pageidavimai' : '3. Special Requests')
+                    : (language === 'lt' ? '3. Pasirinkite priedus' : '3. Add Extras')}
                 </span>
                 <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-[10px] font-semibold tracking-wider font-mono uppercase">
                   {language === 'lt' ? 'Nebūtina' : 'Optional'}

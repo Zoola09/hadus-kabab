@@ -1,20 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   
   --color-charcoal-light: #2D2D2D;
   --color-charcoal: #1E1E1E;
   --color-charcoal-dark: #121212;
-  --color-gold-orange: #D97706;
-  --color-gold-orange-light: #FEE2E2;
-  --color-gold-orange-hover: #B45309;
-  --color-warm-beige: #F5E6D3;
-  --color-warm-beige-light: #FCF7F0;
-  --color-warm-beige-dark: #E4D2BC;
+  --color-gold-orange: #ffb74d;
+  --color-gold-orange-light: #fff3e0;
+  --color-gold-orange-hover: #ffa726;
+  --color-warm-beige: #f5f5dc;
+  --color-warm-beige-light: #fcfcfc;
+  --color-warm-beige-dark: #e8e8d0;
 }
 
 /* Custom Scrollbar for premium aesthetic */
@@ -24,16 +24,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1E1E1E;
+  background: #111111;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D97706;
+  background: #ffb74d;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B45309;
+  background: #ffa726;
 }
 
 html {
@@ -41,8 +41,8 @@ html {
 }
 
 body {
-  background-color: #F5E6D3; /* Warm-beige from Elegant Dark design */
-  color: #1E1E1E;
+  background-color: #fcfcfc;
+  color: #333333;
   overflow-x: hidden;
 }
 
