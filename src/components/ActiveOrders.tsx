@@ -1,4 +1,5 @@
-import { Clock, Flame, ShieldAlert, Award, AlertCircle, Sparkles, Navigation, X } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, Flame, ShieldAlert, Award, AlertCircle, Sparkles, Navigation, X, Trash2, Shield } from 'lucide-react';
 import { Order } from '../types';
 import { useLanguage } from '../LanguageContext';
 
@@ -7,10 +8,22 @@ interface ActiveOrdersProps {
   onClose: () => void;
   activeOrders: Order[];
   onDismissOrder: (orderId: string) => void;
+  onUpdateOrderStatus: (orderId: string, status: Order['status']) => void;
+  isAutoSimulate: boolean;
+  onToggleAutoSimulate: (val: boolean) => void;
 }
 
-export default function ActiveOrders({ isOpen, onClose, activeOrders, onDismissOrder }: ActiveOrdersProps) {
+export default function ActiveOrders({
+  isOpen,
+  onClose,
+  activeOrders,
+  onDismissOrder,
+  onUpdateOrderStatus,
+  isAutoSimulate,
+  onToggleAutoSimulate,
+}: ActiveOrdersProps) {
   const { language } = useLanguage();
+  const [isStaffMode, setIsStaffMode] = useState(false);
   if (!isOpen) return null;
 
   const getStatusDetails = (status: Order['status']) => {
@@ -65,24 +78,66 @@ export default function ActiveOrders({ isOpen, onClose, activeOrders, onDismissO
         onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
-        <div className="px-6 py-4.5 bg-charcoal text-white flex items-center justify-between border-b border-charcoal-light">
+        <div className="px-6 py-4.5 bg-charcoal text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-charcoal-light">
           <div className="flex items-center space-x-2.5">
             <Clock className="w-5.5 h-5.5 text-gold-orange animate-pulse" />
             <h3 className="font-display text-base font-extrabold uppercase tracking-wide">
               Live Kitchen Tracker
             </h3>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg bg-charcoal-light text-gray-400 hover:text-white transition-colors cursor-pointer"
-            aria-label="Close Tracker"
-          >
-            <X className="w-4.5 h-4.5" />
-          </button>
+
+          <div className="flex items-center space-x-3.5">
+            {/* Staff Mode Toggle */}
+            <button
+              onClick={() => setIsStaffMode(!isStaffMode)}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                isStaffMode 
+                  ? 'bg-red-500/10 border-red-500/35 text-red-400 font-extrabold' 
+                  : 'bg-stone-850 border-stone-700 text-gray-400 hover:text-white'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>{isStaffMode ? (language === 'lt' ? 'Valdymo Režimas' : 'Staff Mode ON') : (language === 'lt' ? 'Restorano Darbuotojams' : 'Staff Dashboard')}</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg bg-charcoal-light text-gray-400 hover:text-white transition-colors cursor-pointer"
+              aria-label="Close Tracker"
+            >
+              <X className="w-4.5 h-4.5" />
+            </button>
+          </div>
         </div>
 
         {/* BODY LIST OF CURRENT MEALS */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          {isStaffMode && (
+            <div className="p-4 bg-red-500/5 border border-red-500/15 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in text-left">
+              <div>
+                <h4 className="text-xs font-black text-red-400 uppercase tracking-wide">Restaurant Simulation Control</h4>
+                <p className="text-[11px] text-gray-500 font-semibold mt-0.5">Toggle automatic customer status simulation or manually advance orders below.</p>
+              </div>
+              <div className="flex items-center space-x-3 bg-charcoal px-3 py-2 rounded-xl">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  {language === 'lt' ? 'Auto-Simuliacija' : 'Auto-Simulate Progress'}
+                </span>
+                <button
+                  onClick={() => onToggleAutoSimulate(!isAutoSimulate)}
+                  className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 focus:outline-none cursor-pointer ${
+                    isAutoSimulate ? 'bg-gold-orange' : 'bg-stone-600'
+                  }`}
+                >
+                  <div
+                    className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                      isAutoSimulate ? 'translate-x-4' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          )}
+
           {activeOrders.length === 0 ? (
             <div className="text-center py-10 px-4">
               <ShieldAlert className="w-12 h-12 text-gray-400 mx-auto mb-3" />
@@ -96,9 +151,18 @@ export default function ActiveOrders({ isOpen, onClose, activeOrders, onDismissO
                   
                   {/* TITLE WRAP */}
                   <div className="flex flex-col sm:flex-row sm:items-stretch justify-between gap-3 mb-4.5">
-                    <div>
-                      <span className="font-mono text-[10px] font-extrabold text-stone-700 tracking-wider block uppercase mb-1">ORDER BRAND ID</span>
-                      <span className="font-display text-sm font-black text-charcoal bg-warm-beige-light px-2.2 py-0.5 rounded border border-warm-beige/50">#{order.id.toUpperCase()}</span>
+                    <div className="flex items-center justify-between w-full sm:w-auto">
+                      <div>
+                        <span className="font-mono text-[10px] font-extrabold text-stone-700 tracking-wider block uppercase mb-1">ORDER BRAND ID</span>
+                        <span className="font-display text-sm font-black text-charcoal bg-warm-beige-light px-2.2 py-0.5 rounded border border-warm-beige/50">#{order.id.toUpperCase()}</span>
+                      </div>
+                      <button
+                        onClick={() => onDismissOrder(order.id)}
+                        className="sm:hidden text-red-500 hover:text-red-750 p-1.5 rounded-lg bg-red-50 hover:bg-red-100 transition-colors cursor-pointer"
+                        title="Cancel/Remove Order"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                     
                     <div className="flex flex-wrap gap-4 items-center">
@@ -138,6 +202,17 @@ export default function ActiveOrders({ isOpen, onClose, activeOrders, onDismissO
                             </span>
                           )}
                         </div>
+                      </div>
+                      
+                      <div className="hidden sm:flex items-center border-l border-gray-200 pl-4 animate-fade-in">
+                        <button
+                          onClick={() => onDismissOrder(order.id)}
+                          className="flex items-center space-x-1.5 text-[10px] text-red-500 hover:text-white hover:bg-red-500 font-extrabold uppercase tracking-wider px-2.5 py-1.5 rounded-xl border border-red-500/30 transition-all duration-205 cursor-pointer"
+                          title="Cancel/Remove Order"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>{language === 'lt' ? 'Atšaukti' : 'Cancel'}</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -198,6 +273,65 @@ export default function ActiveOrders({ isOpen, onClose, activeOrders, onDismissO
                       );
                     })}
                   </div>
+
+                  {/* STAFF CONTROL CONTROLLER */}
+                  {isStaffMode && (
+                    <div className="mb-6 p-4 bg-stone-900 text-white rounded-2xl border border-stone-850 text-left animate-fade-in">
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                          <span className="text-[10px] font-extrabold text-stone-400 uppercase tracking-widest">
+                            Staff Operations
+                          </span>
+                        </div>
+                        <span className="text-[9px] font-bold text-gold-orange uppercase bg-stone-800 px-2 py-0.5 rounded">
+                          Status: {order.status}
+                        </span>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2.5">
+                        {order.status === 'received' && (
+                          <button
+                            onClick={() => onUpdateOrderStatus(order.id, 'grilling')}
+                            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-md"
+                          >
+                            Accept & Start Grill
+                          </button>
+                        )}
+                        {order.status === 'grilling' && (
+                          <button
+                            onClick={() => onUpdateOrderStatus(order.id, 'wrapping')}
+                            className="px-3.5 py-2 rounded-xl bg-gold-orange hover:bg-gold-orange-hover text-black text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-md"
+                          >
+                            Mark Wrapped (Foiled)
+                          </button>
+                        )}
+                        {order.status === 'wrapping' && (
+                          <button
+                            onClick={() => onUpdateOrderStatus(order.id, 'ready')}
+                            className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-md"
+                          >
+                            Mark Ready
+                          </button>
+                        )}
+                        {order.status === 'ready' && (
+                          <button
+                            onClick={() => onDismissOrder(order.id)}
+                            className="px-3.5 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-md"
+                          >
+                            Archive Order
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={() => onDismissOrder(order.id)}
+                          className="px-3.5 py-2 rounded-xl bg-red-650 hover:bg-red-750 text-white text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-md ml-auto"
+                        >
+                          Cancel/Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* SUMMARY CARDS OF WHAT EXTRACTED */}
                   <div className="bg-gray-150/40 rounded-2xl p-4.5 border border-gray-250 text-left animate-fade-in">

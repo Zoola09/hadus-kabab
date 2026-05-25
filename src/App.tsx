@@ -21,6 +21,7 @@ export default function App() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
+  const [isAutoSimulate, setIsAutoSimulate] = useState(false);
 
   // Persistence: Restore cart and previous order states from localStorage
   useEffect(() => {
@@ -52,9 +53,9 @@ export default function App() {
   }, [activeOrders]);
 
   // ACTUATION: Live Kitchen Cooking Status Stepper State Machine
-  // Cycles order statuses: received -> grilling -> wrapping -> ready (10 seconds intervals)
+  // Cycles order statuses: received -> grilling -> wrapping -> ready (12 seconds intervals)
   useEffect(() => {
-    if (activeOrders.length === 0) return;
+    if (!isAutoSimulate || activeOrders.length === 0) return;
 
     // Check if there are active orders that aren't 'ready' yet
     const hasActiveWork = activeOrders.some((order) => order.status !== 'ready');
@@ -82,7 +83,7 @@ export default function App() {
     }, 12000); // 12 seconds per step - perfect duration for interactive feedback
 
     return () => clearInterval(interval);
-  }, [activeOrders]);
+  }, [activeOrders, isAutoSimulate]);
 
   // ACTIONS: In-Cart modifications
   const handleUpdateQty = (cartId: string, currentQty: number, adjustment: number) => {
@@ -205,6 +206,12 @@ export default function App() {
     setActiveOrders((prev) => prev.filter((order) => order.id !== orderId));
   };
 
+  const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
+    setActiveOrders((prev) =>
+      prev.map((order) => (order.id === orderId ? { ...order, status } : order))
+    );
+  };
+
   return (
     <div className="min-h-screen bg-warm-beige-light flex flex-col justify-between selection:bg-gold-orange selection:text-white">
       {/* NAVIGATION SECTION */}
@@ -272,6 +279,9 @@ export default function App() {
         onClose={() => setIsTrackerOpen(false)}
         activeOrders={activeOrders}
         onDismissOrder={handleDismissOrder}
+        onUpdateOrderStatus={handleUpdateOrderStatus}
+        isAutoSimulate={isAutoSimulate}
+        onToggleAutoSimulate={setIsAutoSimulate}
       />
     </div>
   );
