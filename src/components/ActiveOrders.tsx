@@ -24,6 +24,22 @@ export default function ActiveOrders({
 }: ActiveOrdersProps) {
   const { language } = useLanguage();
   const [isStaffMode, setIsStaffMode] = useState(false);
+  const [showPasscodePrompt, setShowPasscodePrompt] = useState(false);
+  const [passcodeInput, setPasscodeInput] = useState('');
+  const [passcodeError, setPasscodeError] = useState(false);
+
+  const handlePasscodeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passcodeInput === '1234') {
+      setIsStaffMode(true);
+      setShowPasscodePrompt(false);
+      setPasscodeInput('');
+      setPasscodeError(false);
+    } else {
+      setPasscodeError(true);
+    }
+  };
+
   if (!isOpen) return null;
 
   const getStatusDetails = (status: Order['status']) => {
@@ -89,7 +105,13 @@ export default function ActiveOrders({
           <div className="flex items-center space-x-3.5">
             {/* Staff Mode Toggle */}
             <button
-              onClick={() => setIsStaffMode(!isStaffMode)}
+              onClick={() => {
+                if (isStaffMode) {
+                  setIsStaffMode(false);
+                } else {
+                  setShowPasscodePrompt(true);
+                }
+              }}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                 isStaffMode 
                   ? 'bg-red-500/10 border-red-500/35 text-red-400 font-extrabold' 
@@ -384,6 +406,68 @@ export default function ActiveOrders({
             Cool, thanks!
           </button>
         </div>
+
+        {/* Passcode Prompt Overlay */}
+        {showPasscodePrompt && (
+          <div className="absolute inset-0 bg-charcoal/90 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-fade-in">
+            <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-stone-250 shadow-2xl text-center space-y-4 animate-scale-up">
+              <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto border border-red-100">
+                <Shield className="w-6 h-6 animate-pulse" />
+              </div>
+              <div>
+                <h4 className="font-display text-base font-bold text-stone-900">
+                  {language === 'lt' ? 'Darbuotojų Autentifikavimas' : 'Staff Access Required'}
+                </h4>
+                <p className="text-xs text-stone-500 mt-1 leading-normal">
+                  {language === 'lt' 
+                    ? 'Įveskite 4 skaitmenų PIN kodą, kad pasiektumėte virtuvės valdymą.' 
+                    : 'Please enter the 4-digit Staff PIN to access the kitchen control panel.'}
+                </p>
+              </div>
+              
+              <form onSubmit={handlePasscodeSubmit} className="space-y-3">
+                <input
+                  type="password"
+                  maxLength={4}
+                  placeholder="••••"
+                  value={passcodeInput}
+                  onChange={(e) => {
+                    setPasscodeError(false);
+                    setPasscodeInput(e.target.value.replace(/\D/g, ''));
+                  }}
+                  className={`w-32 mx-auto text-center tracking-[0.5em] font-mono text-xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 ${
+                    passcodeError ? 'border-red-500 bg-red-50' : 'border-stone-300'
+                  }`}
+                />
+                {passcodeError && (
+                  <p className="text-[10px] text-red-500 font-semibold mt-1">
+                    {language === 'lt' ? 'Neteisingas PIN kodas' : 'Incorrect Staff PIN'}
+                  </p>
+                )}
+                
+                <div className="flex space-x-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasscodePrompt(false);
+                      setPasscodeInput('');
+                      setPasscodeError(false);
+                    }}
+                    className="w-1/2 py-2 border border-stone-250 text-stone-600 font-bold text-xs uppercase rounded-xl hover:bg-stone-50 transition-all cursor-pointer"
+                  >
+                    {language === 'lt' ? 'Atšaukti' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="w-1/2 py-2 bg-red-500 hover:bg-red-650 text-white font-bold text-xs uppercase rounded-xl shadow-md shadow-red-500/10 transition-all cursor-pointer"
+                  >
+                    {language === 'lt' ? 'Patvirtinti' : 'Verify'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
