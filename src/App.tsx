@@ -23,10 +23,9 @@ export default function App() {
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [isAutoSimulate, setIsAutoSimulate] = useState(false);
 
-  // Persistence: Restore cart and previous order states from localStorage
+  // Persistence: Restore cart from localStorage, and load orders from database
   useEffect(() => {
     const cachedCart = localStorage.getItem('hadus_cart');
-    const cachedOrders = localStorage.getItem('hadus_orders');
     if (cachedCart) {
       try {
         setCart(JSON.parse(cachedCart));
@@ -34,23 +33,36 @@ export default function App() {
         console.error('Failed to parse cached cart', err);
       }
     }
-    if (cachedOrders) {
+
+    // Run database setup once to ensure tables exist
+    fetch('/api/orders?action=setup', { method: 'POST' }).catch((err) =>
+      console.error('Failed to run DB setup:', err)
+    );
+
+    // Fetch active orders from database
+    const fetchOrders = async () => {
       try {
-        setActiveOrders(JSON.parse(cachedOrders));
+        const res = await fetch('/api/orders');
+        if (res.ok) {
+          const data = await res.json();
+          setActiveOrders(data);
+        }
       } catch (err) {
-        console.error('Failed to parse cached orders', err);
+        console.error('Failed to fetch orders from database:', err);
       }
-    }
+    };
+
+    fetchOrders();
+
+    // Poll the database for active order updates every 10 seconds
+    const interval = setInterval(fetchOrders, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Save changes to cache securely
+  // Save cart changes to cache securely
   useEffect(() => {
     localStorage.setItem('hadus_cart', JSON.stringify(cart));
   }, [cart]);
-
-  useEffect(() => {
-    localStorage.setItem('hadus_orders', JSON.stringify(activeOrders));
-  }, [activeOrders]);
 
   // ACTUATION: Live Kitchen Cooking Status Stepper State Machine
   // Cycles order statuses: received -> grilling -> wrapping -> ready (12 seconds intervals)
@@ -194,8 +206,24 @@ export default function App() {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    // Append to live kitchen list (filtering out completed/ready orders), empty checkout drawer and direct user attention to live tracker
-    setActiveOrders((prev) => [newOrder, ...prev.filter((o) => o.status !== 'ready')]);
+    // Save order to database via API
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newOrder),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to save order');
+        return fetch('/api/orders');
+      })
+      .then((res) => res?.json())
+      .then((data) => {
+        if (data) {
+          setActiveOrders(data);
+        }
+      })
+      .catch((err) => console.error('Error saving order to database:', err));
+
     setCart([]);
     setIsCheckoutOpen(false);
     setIsCartOpen(false);
@@ -203,13 +231,25 @@ export default function App() {
   };
 
   const handleDismissOrder = (orderId: string) => {
+    // Update local state first for immediate UI feedback
     setActiveOrders((prev) => prev.filter((order) => order.id !== orderId));
+
+    // Delete from database
+    fetch(`/api/orders?id=${orderId}`, {
+      method: 'DELETE',
+    }).catch((err) => console.error('Error deleting order from database:', err));
   };
 
   const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
+    // Update local state first for immediate UI responsiveness
     setActiveOrders((prev) =>
       prev.map((order) => (order.id === orderId ? { ...order, status } : order))
     );
+
+    // Persist to database
+    fetch(`/api/orders?id=${orderId}&status=${status}`, {
+      method: 'PUT',
+    }).catch((err) => console.error('Error updating order status in database:', err));
   };
 
   return (
