@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, MapPin, Truck, CreditCard, Wallet, Smartphone, ArrowLeft, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { CartItem } from '../types';
@@ -17,6 +17,90 @@ interface CheckoutModalProps {
 }
 
 type CheckoutStep = 'details' | 'payment' | 'processing' | 'success';
+
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  color: string;
+  size: number;
+  angle: number;
+  speed: number;
+  rotation: number;
+}
+
+function ConfettiEffect() {
+  const [particles, setParticles] = useState<Particle[]>([]);
+
+  useEffect(() => {
+    const colors = ['#ffb74d', '#ffa726', '#ff7043', '#4db6ac', '#81c784', '#64b5f6', '#ba68c8'];
+    const newParticles: Particle[] = [];
+    for (let i = 0; i < 90; i++) {
+      newParticles.push({
+        id: i,
+        x: 50, // Center X
+        y: 25, // Start near the success icon
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: Math.random() * 8 + 6,
+        angle: Math.random() * Math.PI * 2,
+        speed: Math.random() * 9 + 5,
+        rotation: Math.random() * 360,
+      });
+    }
+    setParticles(newParticles);
+
+    let animationFrameId: number;
+    const startTime = Date.now();
+
+    const updateParticles = () => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      if (elapsed > 2.5) return;
+
+      setParticles((prev) =>
+        prev.map((p) => {
+          const rad = p.angle;
+          const currentSpeed = Math.max(0, p.speed - elapsed * 5.5);
+          const dx = Math.cos(rad) * currentSpeed * 2.2;
+          const dy = Math.sin(rad) * currentSpeed * 2.2 + elapsed * elapsed * 18;
+
+          return {
+            ...p,
+            x: p.x + dx,
+            y: p.y + dy,
+            rotation: p.rotation + currentSpeed * 1.8,
+          };
+        })
+      );
+
+      animationFrameId = requestAnimationFrame(updateParticles);
+    };
+
+    animationFrameId = requestAnimationFrame(updateParticles);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          style={{
+            position: 'absolute',
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            backgroundColor: p.color,
+            transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
+            borderRadius: p.id % 3 === 0 ? '50%' : p.id % 3 === 1 ? '0%' : '20%',
+            opacity: Math.max(0, 1 - (p.y / 100)),
+            transition: 'opacity 0.15s ease',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function CheckoutModal({
   isOpen,
@@ -532,9 +616,11 @@ export default function CheckoutModal({
 
           {/* STEP 4: SUCCESS */}
           {step === 'success' && (
-            <div className="py-8 flex flex-col items-center justify-center text-center space-y-5 animate-scale-up">
-              <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center border border-green-200 animate-bounce-short">
-                <CheckCircle className="w-9 h-9" />
+            <div className="py-8 flex flex-col items-center justify-center text-center space-y-5 animate-scale-up relative">
+              <ConfettiEffect />
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center border-4 border-emerald-100 shadow-lg shadow-emerald-500/10 animate-bounce-short relative">
+                <CheckCircle className="w-10 h-10 animate-pulse" />
+                <div className="absolute inset-0 rounded-full border-2 border-emerald-500/30 animate-ping opacity-75" />
               </div>
 
               <div>
