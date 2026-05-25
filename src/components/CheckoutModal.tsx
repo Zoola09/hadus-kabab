@@ -50,20 +50,30 @@ export default function CheckoutModal({
   const validateDetailsStep = () => {
     const errors: Record<string, string> = {};
     
+    // Validate Name (cannot contain numbers, must be at least 2 chars)
+    if (!customerName.trim()) {
+      errors.name = language === 'lt' ? 'Prašome nurodyti savo vardą' : 'Please provide your name';
+    } else if (/\d/.test(customerName)) {
+      errors.name = language === 'lt' ? 'Varde negali būti skaičių' : 'Name cannot contain numbers';
+    } else if (customerName.trim().length < 2) {
+      errors.name = language === 'lt' ? 'Vardas per trumpas' : 'Name is too short';
+    }
+
+    // Validate Phone (must be a valid phone number, digits only with optional country code prefix)
+    const phoneTrimmed = customerPhone.trim();
+    if (!phoneTrimmed) {
+      errors.phone = language === 'lt' ? 'Reikalingas telefono numeris' : 'Phone number is required';
+    } else {
+      const phoneRegex = /^\+?[0-9\s\-()]{7,15}$/;
+      if (!phoneRegex.test(phoneTrimmed)) {
+        errors.phone = language === 'lt' ? 'Nurodykite teisingą telefono numerį' : 'Please provide a valid phone number';
+      }
+    }
+    
+    // Validate Address (only for delivery)
     if (orderType === 'delivery') {
-      if (!customerName.trim()) {
-        errors.name = language === 'lt' ? 'Prašome nurodyti savo vardą' : 'Please provide your name';
-      }
-      if (!customerPhone.trim()) {
-        errors.phone = language === 'lt' ? 'Reikalingas telefonas užsakymo patvirtinimui' : 'Phone is required for verification';
-      }
       if (!deliveryAddress.trim()) {
         errors.address = language === 'lt' ? 'Reikalingas pristatymo adresas' : 'Delivery address is required';
-      }
-    } else {
-      // Pickup requires at least name for order lookup
-      if (!customerName.trim()) {
-        errors.name = language === 'lt' ? 'Prašome nurodyti savo vardą' : 'Please provide your name';
       }
     }
 
